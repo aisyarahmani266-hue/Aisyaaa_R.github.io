@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toko Adila</title>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="brand">
+                <i data-lucide="store" class="brand-icon"></i>
+                <h1>Toko Adila</h1>
+            </div>
+
+            <ul class="nav-links">
+                <li class="active" onclick="showPage('cashier')">
+                    <i data-lucide="shopping-cart"></i>
+                    <span>Kasir</span>
+                </li>
+                <li onclick="showPage('inventory')">
+                    <i data-lucide="package"></i>
+                    <span>Barang</span>
+                </li>
+                <li onclick="showPage('reports')">
+                    <i data-lucide="bar-chart-3"></i>
+                    <span>Laporan</span>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+
+            <!-- PAGE: CASHIER -->
+            <section id="page-cashier" class="page active">
+                <div class="cashier-layout">
+                    <!-- Left: Product Selection -->
+                    <div class="product-section">
+                        <div class="search-bar">
+                            <input type="text" id="cashier-input-code" placeholder="Ketik Kode / Nama Barang..."
+                                autofocus>
+                            <button class="btn-primary" onclick="addToCartByInput()">
+                                <i data-lucide="plus"></i> Tambah
+                            </button>
+                        </div>
+
+                        <div class="categories" id="category-list">
+                            <button class="cat-btn active" onclick="filterCategory('all')">Semua</button>
+                            <button class="cat-btn" onclick="filterCategory('persabunan')">Persabunan</button>
+                            <button class="cat-btn" onclick="filterCategory('minuman')">Minuman</button>
+                            <button class="cat-btn" onclick="filterCategory('makanan')">Makanan/Snack</button>
+                            <button class="cat-btn" onclick="filterCategory('bahan')">Bahan</button>
+                            <button class="cat-btn" onclick="filterCategory('bumbu')">Bumbu</button>
+                            <button class="cat-btn" onclick="filterCategory('pulsa')">Pulsa</button>
+                            <button class="cat-btn" onclick="filterCategory('token')">Token PLN</button>
+                        </div>
+
+                        <div class="product-grid" id="product-grid-container">
+                            <!-- Products injected by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Right: Cart/Order -->
+                    <div class="cart-section">
+                        <div class="cart-header">
+                            <h2>Pesanan</h2>
+                            <button class="btn-danger-text" onclick="clearCart()">Reset</button>
+                        </div>
+                        <div class="cart-items" id="cart-items-container">
+                            <!-- Cart Items injected by JS -->
+                            <div class="empty-state">Belum ada pesanan</div>
+                        </div>
+                        <div class="cart-footer">
+                            <div class="total-row">
+                                <span>Total</span>
+                                <span class="total-price" id="cart-total-display">Rp 0</span>
+                            </div>
+                            <div style="display: flex; gap: 8px;">
+                                <button class="btn-checkout" style="flex: 1; background-color: #ffcc80; color: #5d4037;"
+                                    onclick="processCheckout('hutang')">
+                                    <i data-lucide="clipboard-list"></i> Hutang
+                                </button>
+                                <button class="btn-checkout" style="flex: 1;" onclick="processCheckout('lunas')">
+                                    <i data-lucide="banknote"></i> Bayar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PAGE: INVENTORY -->
+            <section id="page-inventory" class="page">
+                <div class="page-header">
+                    <h2>Manajemen Barang</h2>
+                    <button class="btn-primary" onclick="openProductModal()">
+                        <i data-lucide="plus-circle"></i> Tambah Barang
+                    </button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Kode</th>
+                                <th>Nama</th>
+                                <th>Kategori</th>
+                                <th>Harga</th>
+                                <th>Stok</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventory-table-body">
+                            <!-- Inventory Rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- PAGE: REPORTS -->
+            <section id="page-reports" class="page">
+                <div class="page-header">
+                    <h2>Laporan Penjualan</h2>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn-primary" onclick="exportReportToCSV()">
+                            <i data-lucide="download"></i> Export CSV
+                        </button>
+                        <select id="report-month-filter" onchange="renderReports()">
+                            <option value="all">Semua Waktu</option>
+                            <!-- Month options injected by JS -->
+                        </select>
+                    </div>
+                </div>
+                <div class="stats-card">
+                    <h3>Total Pendapatan (Bulan Ini)</h3>
+                    <h1 id="report-total-revenue">Rp 0</h1>
+                </div>
+                <!-- Debt Section -->
+                <div class="report-section" style="margin-bottom: 2rem;">
+                    <h3 style="color: #d84315; margin-bottom: 1rem;">Daftar Piutang (Belum Bayar)</h3>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Tanggal</th>
+                                    <th>Pembeli</th>
+                                    <th>Items</th>
+                                    <th>Total</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="report-hutang-body">
+                                <!-- Debts rendered here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Paid Section -->
+                <div class="report-section">
+                    <h3 style="color: #2e7d32; margin-bottom: 1rem;">Laporan Penjualan (Lunas)</h3>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Tanggal</th>
+                                    <th>Waktu</th>
+                                    <th>Pembeli</th>
+                                    <th>Total Item</th>
+                                    <th>Total Harga</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="report-lunas-body">
+                                <!-- Paid/Lunas rendered here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- MODAL: ADD/EDIT PRODUCT -->
+    <div id="product-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3 id="modal-title">Tambah Barang</h3>
+            <form id="product-form" onsubmit="handleProductSubmit(event)">
+                <input type="hidden" id="edit-product-id">
+
+                <div class="form-group">
+                    <label>Kode Barang (Otomatis)</label>
+                    <input type="text" id="prod-code" required readonly
+                        style="background-color: #f0f0f0; cursor: not-allowed;">
+                </div>
+                <div class="form-group">
+                    <label>Nama Barang</label>
+                    <input type="text" id="prod-name" required>
+                </div>
+                <div class="form-group">
+                    <label>Kategori</label>
+                    <select id="prod-category">
+                        <option value="persabunan">Persabunan</option>
+                        <option value="minuman">Minuman</option>
+                        <option value="makanan">Makanan/Snack</option>
+                        <option value="bahan">Bahan Makanan</option>
+                        <option value="bumbu">Bumbu</option>
+                        <option value="pulsa">Pulsa</option>
+                        <option value="token">Token PLN</option>
+                        <option value="lainnya">Lainnya</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Harga (Rp)</label>
+                    <input type="number" id="prod-price" required min="0">
+                </div>
+                <div class="form-group">
+                    <label>Stok</label>
+                    <input type="number" id="prod-stock" value="100" min="0">
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" onclick="closeProductModal()">Batal</button>
+                    <button type="submit" class="btn-primary">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+
+</html>
